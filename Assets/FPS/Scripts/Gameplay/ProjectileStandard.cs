@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Unity.FPS.Game;
 using UnityEngine;
 
@@ -74,7 +75,13 @@ namespace Unity.FPS.Gameplay
 
             m_ProjectileBase.OnShoot += OnShoot;
 
-            Destroy(gameObject, MaxLifeTime);
+            StartCoroutine(DeactivateAfterMaxLifeTime());
+        }
+
+        private IEnumerator DeactivateAfterMaxLifeTime()
+        {
+            yield return new WaitForSeconds(MaxLifeTime);
+            gameObject.SetActive(false);
         }
 
         new void OnShoot()
@@ -256,8 +263,8 @@ namespace Unity.FPS.Gameplay
                 AudioUtility.CreateSFX(ImpactSfxClip, point, AudioUtility.AudioGroups.Impact, 1f, 3f);
             }
 
-            // Self Destruct
-            Destroy(this.gameObject);
+            // Disable self (allowing return to pool)
+            gameObject.SetActive(false);
         }
 
         void OnDrawGizmosSelected()
