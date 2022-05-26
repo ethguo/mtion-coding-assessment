@@ -4,26 +4,29 @@ using UnityEngine;
 
 namespace ObjectPooler
 {
-    public class ObjectPooler<T> where T : Object
+    public class ObjectPooler
     {
-        private T m_prefab;
+
+        private GameObject m_prefab;
 
         private int m_maxPoolSize;
 
-        private Stack<T> m_stack;
+        private Stack<GameObject> m_inactiveStack;
 
-        public ObjectPooler(T prefab, int maxPoolSize = 10)
+        public ObjectPooler(GameObject prefab, int maxPoolSize = 10)
         {
             m_prefab = prefab;
             m_maxPoolSize = maxPoolSize;
-            m_stack = new Stack<T>(maxPoolSize);
+            m_inactiveStack = new Stack<GameObject>(maxPoolSize);
         }
 
-        public T Get()
+        public GameObject Get()
         {
-            if (m_stack.Count > 0)
+            if (m_inactiveStack.Count > 0)
             {
-                return m_stack.Pop();
+                GameObject go = m_inactiveStack.Pop();
+                go.SetActive(true);
+                return go;
             }
             else
             {
@@ -31,9 +34,35 @@ namespace ObjectPooler
             }
         }
 
-        private T GetNew()
+        public void Release(GameObject obj)
         {
-            return Object.Instantiate(m_prefab);
+            m_inactiveStack.Push(obj);
+        }
+
+        private GameObject GetNew()
+        {
+            GameObject go = Object.Instantiate(m_prefab);
+            PooledObject po = go.AddComponent<PooledObject>();
+            po.pool = this;
+            return go;
+        }
+
+    }
+
+    public class ObjectPooler<T> : ObjectPooler where T : Component
+    {
+        public ObjectPooler(T prefab, int maxPoolSize = 10)
+            : base(prefab.gameObject, maxPoolSize)
+        { }
+
+        public new T Get()
+        {
+            return base.Get().GetComponent<T>();
+        }
+
+        public void Release(T obj)
+        {
+            base.Release(obj.gameObject);
         }
     }
 }
