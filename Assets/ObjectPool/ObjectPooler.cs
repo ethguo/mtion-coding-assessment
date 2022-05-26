@@ -13,11 +13,18 @@ namespace ObjectPooler
 
         private Stack<GameObject> m_inactiveStack;
 
-        public ObjectPooler(GameObject prefab, int maxPoolSize = 10)
+        public ObjectPooler(GameObject prefab, int initialPoolSize = 0, int maxPoolSize = 10)
         {
             m_prefab = prefab;
             m_maxPoolSize = maxPoolSize;
             m_inactiveStack = new Stack<GameObject>(maxPoolSize);
+
+            for (int i = 0; i < initialPoolSize; i++)
+            {
+                GameObject go = GetNew();
+                go.SetActive(false);
+                m_inactiveStack.Push(go);
+            }
         }
 
         public GameObject Get()
@@ -58,8 +65,8 @@ namespace ObjectPooler
 
     public class ObjectPooler<T> : ObjectPooler where T : Component
     {
-        public ObjectPooler(T prefab, int maxPoolSize = 10)
-            : base(prefab.gameObject, maxPoolSize)
+        public ObjectPooler(T prefab, int initialPoolSize = 0, int maxPoolSize = 10)
+            : base(prefab.gameObject, initialPoolSize, maxPoolSize)
         { }
 
         public new T Get()

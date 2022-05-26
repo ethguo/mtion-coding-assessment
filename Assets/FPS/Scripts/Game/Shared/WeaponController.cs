@@ -199,7 +199,7 @@ namespace Unity.FPS.Game
                 }
             }
 
-            m_projectilePool = new ObjectPooler<ProjectileBase>(ProjectilePrefab);
+            m_projectilePool = new ObjectPooler<ProjectileBase>(ProjectilePrefab, 3);
         }
 
         public void AddCarriablePhysicalBullets(int count) => m_CarriedPhysicalBullets = Mathf.Max(m_CarriedPhysicalBullets + count, MaxAmmo);
