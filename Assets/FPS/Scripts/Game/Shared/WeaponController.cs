@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+using ObjectPooler;
+
 namespace Unity.FPS.Game
 {
     public enum WeaponShootType
@@ -163,6 +165,8 @@ namespace Unity.FPS.Game
 
         private Queue<Rigidbody> m_PhysicalAmmoPool;
 
+        private ObjectPooler<ProjectileBase> m_projectilePool;
+
         void Awake()
         {
             m_CurrentAmmo = MaxAmmo;
@@ -194,6 +198,8 @@ namespace Unity.FPS.Game
                     m_PhysicalAmmoPool.Enqueue(shell.GetComponent<Rigidbody>());
                 }
             }
+
+            m_projectilePool = new ObjectPooler<ProjectileBase>(ProjectilePrefab);
         }
 
         public void AddCarriablePhysicalBullets(int count) => m_CarriedPhysicalBullets = Mathf.Max(m_CarriedPhysicalBullets + count, MaxAmmo);
@@ -447,7 +453,9 @@ namespace Unity.FPS.Game
             for (int i = 0; i < bulletsPerShotFinal; i++)
             {
                 Vector3 shotDirection = GetShotDirectionWithinSpread(WeaponMuzzle);
-                ProjectileBase newProjectile = Instantiate(ProjectilePrefab, WeaponMuzzle.position,
+                ProjectileBase newProjectile = m_projectilePool.Get();
+                newProjectile.transform.SetPositionAndRotation(
+                    WeaponMuzzle.position,
                     Quaternion.LookRotation(shotDirection));
                 newProjectile.Shoot(this);
             }
