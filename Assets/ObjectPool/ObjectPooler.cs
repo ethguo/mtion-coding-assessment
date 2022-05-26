@@ -36,7 +36,14 @@ namespace ObjectPooler
 
         public void Release(GameObject obj)
         {
-            m_inactiveStack.Push(obj);
+            if (m_inactiveStack.Count < m_maxPoolSize)
+            {
+                m_inactiveStack.Push(obj);
+            }
+            else
+            {
+                Object.Destroy(obj);
+            }
         }
 
         private GameObject GetNew()
